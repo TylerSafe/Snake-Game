@@ -4,6 +4,7 @@ import time
 import random
 
 SIZE = 20
+BACKGROUND = (255, 255, 255)
 
 class Apple:
     def __init__(self, screen):
@@ -35,7 +36,7 @@ class Snake:
         self.y_coord.append(-1)
     
     def draw(self):
-        self.screen.fill((255, 255, 255))
+        self.screen.fill(BACKGROUND)
         for i in range(self.length):
             self.screen.blit(self.snake, (self.x_coord[i], self.y_coord[i]))
         pygame.display.flip()
@@ -74,7 +75,7 @@ class Game:
         pygame.init()
         self.board = pygame.display.set_mode((800, 600))
         # change colour of the background
-        self.board.fill((255, 255, 255))
+        self.board.fill(BACKGROUND)
         
         self.snake = Snake(self.board, 3, 150, 150)
         self.snake.draw()
@@ -87,11 +88,17 @@ class Game:
         self.score()
         pygame.display.flip()
 
-        if self.eat_apple(self.snake.x_coord[0], self.snake.y_coord[0], self.apple.x_coord, self.apple.y_coord):
+        # when snake collides with an apple move the apple and increase the length of the snake
+        if self.collision(self.snake.x_coord[0], self.snake.y_coord[0], self.apple.x_coord, self.apple.y_coord):
             self.apple.move()
             self.snake.increase_length()
+
+        # when a snake collides with itself lose the game
+        for i in range(1, self.snake.length):
+            if self.collision(self.snake.x_coord[0], self.snake.y_coord[0], self.snake.x_coord[i], self.snake.y_coord[i]):
+                raise 'game over'
     
-    def eat_apple(self, x1, y1, x2, y2):
+    def collision(self, x1, y1, x2, y2):
         if x1 >= x2 and x1 < x2 + SIZE:
             if y1 >= y2 and y1 < y2 + SIZE:
                 return True
@@ -103,28 +110,54 @@ class Game:
         score = font.render('Score: ' + str(self.snake.length), True, (0, 0, 0))
         self.board.blit(score, (650, 15))
 
+    def game_over(self):
+        self.board.fill(BACKGROUND)
+        font = pygame.font.SysFont('arial', 20)
+        text1 = font.render('Game over! Your score is: ' + str(self.snake.length), True, (0, 0, 0))
+        self.board.blit(text1, (220, 100))
+        text2 = font.render('To play single player press 1 or for 2 player (vs) press 2. Escape to exit', True, (0, 0, 0))
+        self.board.blit(text2, (115, 150))
+        pygame.display.flip()
+
+    def reset(self):
+        self.snake = Snake(self.board, 3, 150, 150)
+        self.apple = Apple(self.board)
+    
     def run(self):
         # open the window until it is closed
         running = True
+        pause = False
         while running:
             for event in pygame.event.get():
-                if event.type == KEYDOWN:
+                if event.type == KEYDOWN:                    
                     if event.key == K_ESCAPE:
                         running = False
 
-                    if event.key == K_UP:
-                        self.snake.up()
-                    if event.key == K_DOWN:
-                        self.snake.down()
-                    if event.key == K_LEFT:
-                        self.snake.left()
-                    if event.key == K_RIGHT:
-                        self.snake.right()
+                    if event.key == K_1:
+                        pause = False
+
+                    if pause == False:
+                        if event.key == K_UP:
+                            self.snake.up()
+                        if event.key == K_DOWN:
+                            self.snake.down()
+                        if event.key == K_LEFT:
+                            self.snake.left()
+                        if event.key == K_RIGHT:
+                            self.snake.right()
 
                 elif event.type == QUIT:
                     running = False
 
-            self.play()
+            try:
+                if pause == False:
+                    self.play()
+            except:
+                self.game_over()
+                pause = True
+                self.reset()
+            
+            
             time.sleep(0.2)
 
 if __name__ == "__main__":
