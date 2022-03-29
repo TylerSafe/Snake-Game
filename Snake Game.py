@@ -5,6 +5,8 @@ import random
 
 SIZE = 20
 BACKGROUND = (255, 255, 255)
+WIDTH = 800
+HEIGHT = 600
 
 class Apple:
     def __init__(self, screen):
@@ -54,10 +56,10 @@ class Snake:
         self.direction = 'right'
 
     def move(self):
-        for i in range(self.length - 1 , 0, -1):
+        for i in range(self.length - 1 , 0, -1):            
             self.x_coord[i] = self.x_coord[i - 1]
             self.y_coord[i] = self.y_coord[i - 1]
-        
+  
         if self.direction == 'up':
             self.y_coord[0] -= SIZE
         if self.direction == 'down':
@@ -66,6 +68,8 @@ class Snake:
             self.x_coord[0] -= SIZE
         if self.direction == 'right':
             self.x_coord[0] += SIZE
+
+        
         
         self.draw()
 
@@ -73,7 +77,7 @@ class Game:
     def __init__(self):
         # initialise the board
         pygame.init()
-        self.board = pygame.display.set_mode((800, 600))
+        self.board = pygame.display.set_mode((WIDTH, HEIGHT))
         # change colour of the background
         self.board.fill(BACKGROUND)
         
@@ -98,11 +102,17 @@ class Game:
             if self.collision(self.snake.x_coord[0], self.snake.y_coord[0], self.snake.x_coord[i], self.snake.y_coord[i]):
                 raise 'game over'
     
+    # determine whether a collision occurs between the snake and another object
     def collision(self, x1, y1, x2, y2):
+        # if the snake hits itself the game is over
         if x1 >= x2 and x1 < x2 + SIZE:
             if y1 >= y2 and y1 < y2 + SIZE:
                 return True
 
+        # if the snake hits the edge of the screen the game is over
+        if self.snake.x_coord[0] > WIDTH - SIZE or self.snake.x_coord[0] < 0 or self.snake.y_coord[0] > HEIGHT - SIZE or self.snake.y_coord[0] < 0:
+            return True
+        
         return False
 
     def score(self):
