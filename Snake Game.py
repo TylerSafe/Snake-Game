@@ -39,6 +39,7 @@ class Snake:
     
     def draw(self):
         self.screen.fill(BACKGROUND)
+        pygame.draw.rect(self.screen, (189, 189, 189), pygame.Rect(0, 0, WIDTH, HEIGHT),  10)
         for i in range(self.length):
             self.screen.blit(self.snake, (self.x_coord[i], self.y_coord[i]))
         pygame.display.flip()
@@ -69,8 +70,7 @@ class Snake:
         if self.direction == 'right':
             self.x_coord[0] += SIZE
 
-        
-        
+                
         self.draw()
 
 class Game:
@@ -120,11 +120,16 @@ class Game:
         score = font.render('Score: ' + str(self.snake.length), True, (0, 0, 0))
         self.board.blit(score, (650, 15))
 
-    def game_over(self):
+    # display screen when game is opened and when game is lost
+    def game_over(self, reason):
+        # create background with text to replace game board
         self.board.fill(BACKGROUND)
         font = pygame.font.SysFont('arial', 20)
-        text1 = font.render('Game over! Your score is: ' + str(self.snake.length), True, (0, 0, 0))
-        self.board.blit(text1, (220, 100))
+        # if called because game lost print the score on screen
+        if reason == 'game over':
+            text1 = font.render('Game over! Your score is: ' + str(self.snake.length), True, (0, 0, 0))
+            self.board.blit(text1, (220, 100))
+        # give the user an option to play solo or vs another player
         text2 = font.render('To play single player press 1 or for 2 player (vs) press 2. Escape to exit', True, (0, 0, 0))
         self.board.blit(text2, (115, 150))
         pygame.display.flip()
@@ -136,7 +141,8 @@ class Game:
     def run(self):
         # open the window until it is closed
         running = True
-        pause = False
+        pause = True
+        self.game_over('start menu')
         while running:
             for event in pygame.event.get():
                 if event.type == KEYDOWN:                    
@@ -163,7 +169,7 @@ class Game:
                 if pause == False:
                     self.play()
             except:
-                self.game_over()
+                self.game_over('game over')
                 pause = True
                 self.reset()
             
