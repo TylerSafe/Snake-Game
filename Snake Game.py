@@ -134,9 +134,11 @@ class Game:
         self.board.blit(text2, (115, 150))
         pygame.display.flip()
 
-    def reset(self):
-        self.snake = Snake(self.board, 3, 150, 150)
+    def reset(self, option = 1):
+        self.snake = Snake(self.board, 3, 150, 250)
         self.apple = Apple(self.board)
+        if option == 2:
+            self.snake2 = Snake(self.board, 3, (WIDTH - 250), 250)
     
     def run(self):
         # open the window until it is closed
@@ -150,6 +152,8 @@ class Game:
                         running = False
 
                     if event.key == K_1:
+                        pause = False
+                    if event.key == K_2:
                         pause = False
 
                     if pause == False:
