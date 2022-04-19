@@ -3,27 +3,34 @@ from pygame.locals import *
 import time
 import random
 
+# declare constants
 SIZE = 20
 BACKGROUND = (255, 255, 255)
 WIDTH = 800
 HEIGHT = 600
 
+# creates the apple for the snake to eat as well as controlling its movement
 class Apple:
+    # information required to create an apple
     def __init__(self, screen):
         self.screen = screen
         self.apple = pygame.image.load('apple.png').convert()
         self.x_coord = (random.randint(2, 38) * SIZE) + 10
         self.y_coord = (random.randint(2, 28) * SIZE) + 10
 
+    # draw the apple on the screen
     def draw(self):
         self.screen.blit(self.apple, (self.x_coord, self.y_coord))
         pygame.display.flip()
 
+    # define the next location the apple will move to
     def move(self):
         self.x_coord = (random.randint(2, 38) * SIZE) + 10
         self.y_coord = (random.randint(2, 28) * SIZE) + 10
 
+# create the snake including movement and size
 class Snake:
+    # information required to create a snake
     def __init__(self, screen, length, x_start, y_start):
         self.length = length
         self.screen = screen
@@ -32,11 +39,13 @@ class Snake:
         self.y_coord = [y_start] * length
         self.direction = 'up'
 
+    # increases the length of the snake by 1
     def increase_length(self):
         self.length += 1
         self.x_coord.append(-1)
         self.y_coord.append(-1)
     
+    # draw the snake on the screen
     def draw(self):
         self.screen.fill(BACKGROUND)
         pygame.draw.rect(self.screen, (189, 189, 189), pygame.Rect(0, 0, WIDTH, HEIGHT),  10)
@@ -44,6 +53,7 @@ class Snake:
             self.screen.blit(self.snake, (self.x_coord[i], self.y_coord[i]))
         pygame.display.flip()
 
+    # control what direction the snake goes based on input
     def up(self):
         self.direction = 'up'
     
@@ -56,6 +66,7 @@ class Snake:
     def right(self):
         self.direction = 'right'
 
+    # move the entire length of the snake based on user input
     def move(self):
         for i in range(self.length - 1 , 0, -1):            
             self.x_coord[i] = self.x_coord[i - 1]
@@ -70,9 +81,10 @@ class Snake:
         if self.direction == 'right':
             self.x_coord[0] += SIZE
 
-                
+        # redraw the snake after a move        
         self.draw()
 
+# create the game board and run time interactions
 class Game:
     def __init__(self):
         # initialise the board
@@ -80,12 +92,13 @@ class Game:
         self.board = pygame.display.set_mode((WIDTH, HEIGHT))
         # change colour of the background
         self.board.fill(BACKGROUND)
-        
+        # initialise a snake and apple
         self.snake = Snake(self.board, 3, 150, 150)
         self.snake.draw()
         self.apple = Apple(self.board)
         self.apple.draw()
 
+    # start the game and check if the snake collides with anything
     def play(self):
         self.snake.move()
         self.apple.draw()
@@ -115,6 +128,7 @@ class Game:
         
         return False
 
+    # keep track of the amount of apples a user has eaten
     def score(self):
         font = pygame.font.SysFont('arial', 20)
         score = font.render('Score: ' + str(self.snake.length), True, (0, 0, 0))
@@ -134,6 +148,7 @@ class Game:
         self.board.blit(text2, (115, 150))
         pygame.display.flip()
 
+    # reset the game to intial state once the user has lost
     def reset(self, option = 1):
         self.snake = Snake(self.board, 3, 150, 250)
         self.apple = Apple(self.board)
@@ -147,6 +162,7 @@ class Game:
         self.game_over('start menu')
         while running:
             for event in pygame.event.get():
+                # determine action when a key is pressed
                 if event.type == KEYDOWN:                    
                     if event.key == K_ESCAPE:
                         running = False
@@ -168,16 +184,17 @@ class Game:
 
                 elif event.type == QUIT:
                     running = False
-
+            # check if the game has been paused, if not continue
             try:
                 if pause == False:
                     self.play()
+            # pause the game when the user has lost and give them the option to try again
             except:
                 self.game_over('game over')
                 pause = True
                 self.reset()
             
-            
+            # interval of time between each movement
             time.sleep(0.2)
 
 if __name__ == "__main__":
